@@ -1,4 +1,4 @@
-name: droidian rootfs-builder
+name: DLS_OS rootfs-builder
 
 on:
   workflow_dispatch:
