@@ -1,4 +1,4 @@
-name: droidian rootfs test build
+name: DLS_OS rootfs test build
 
 on:
   push:
