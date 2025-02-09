@@ -22,7 +22,6 @@ jobs:
         run: |
           JOBS="$(./generate_device_recipe.py --matrix)"
           echo "matrix=${JOBS}" >> $GITHUB_OUTPUT
-
   build:
     runs-on: ubuntu-20.04
     needs: once
@@ -76,7 +75,6 @@ jobs:
       - name: Build rootfs
         run: |
           docker exec $CONTAINER_HASH /bin/sh -c 'cd /buildd/sources; DLS_OS_VERSION="${{ env.DLS_OS_VERSION }}" ./generate_device_recipe.py ${{ matrix.config.product }} ${{ matrix.config.arch }} ${{ matrix.config.edition }} ${{ matrix.config.variant }} ${{ matrix.config.apilevel }} && debos --disable-fakemachine generated/dls_os.yaml'
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -84,6 +82,7 @@ jobs:
           path: out/*
           if-no-files-found: error
           retention-days: 1
+          
 
   prepare:
     runs-on: ubuntu-20.04
@@ -114,7 +113,6 @@ jobs:
           gh release delete nightly --yes | true
           git push --delete origin refs/tags/nightly || true
           gh release create nightly
-
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -140,5 +138,51 @@ jobs:
           prerelease: false
 
       - name: Create nightly release
-        id:create_nightly 
-        if:startWith(github.ref,'refs/tag/dlsos)!=true
+        id: create_nightly
+        if: startsWith(github.ref, 'refs/tags/dls_os') != true
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dls_os-out/SHA256SUMS
+          tag_name: nightly
+          draft: false
+          prerelease: true
+
+  publish:
+    runs-on: ubuntu-20.04
+    needs: [once, prepare]
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}${{ steps.create_nightly.outputs.upload_url }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config: ${{ fromJson(needs.once.outputs.matrix) }}
+
+    name: Publish ${{ matrix.config.job_name }}
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dls_os-out-${{ matrix.config.product }}-${{ matrix.config.arch }}-${{ matrix.config.edition }}-${{ matrix.config.variant }}-${{ matrix.config.apilevel }}
+          path: dls_os-out
+
+      - name: Create stable release (drafted)
+        id: create_release
+        if: startsWith(github.ref, 'refs/tags/dls_os')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dls_os-out/*
+          tag_name: ${{ github.ref }}
+          draft: true
+          prerelease: false
+
+      - name: Create nightly release
+        id: create_nightly
+        if: startsWith(github.ref, 'refs/tags/dls_os') != true
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dls_os-out/*
+          tag_name: nightly
+          draft: false
+          prerelease: true
