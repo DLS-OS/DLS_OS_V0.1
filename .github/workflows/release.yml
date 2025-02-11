@@ -22,6 +22,7 @@ jobs:
         run: |
           JOBS="$(./generate_device_recipe.py --matrix)"
           echo "matrix=${JOBS}" >> $GITHUB_OUTPUT
+
   build:
     runs-on: ubuntu-20.04
     needs: once
@@ -41,15 +42,15 @@ jobs:
         run: echo "release_suffix=_${{ env.current_date }}" >> $GITHUB_ENV
 
       - name: Set nightly version
-        if: startsWith(github.ref, 'refs/tags/dls_os') != true
-        run: echo "DLS_OS_VERSION=next" >> $GITHUB_ENV
+        if: startsWith(github.ref, 'refs/tags/droidian') != true
+        run: echo "DROIDIAN_VERSION=next" >> $GITHUB_ENV
 
       - name: Set version
-        if: startsWith(github.ref, 'refs/tags/dls_os') == true
-        run: echo "DLS_OS_VERSION=$(echo ${{ github.ref }} | rev | cut -d'/' -f1 | rev)" >> $GITHUB_ENV
+        if: startsWith(github.ref, 'refs/tags/droidian') == true
+        run: echo "DROIDIAN_VERSION=$(echo ${{ github.ref }} | rev | cut -d'/' -f1 | rev)" >> $GITHUB_ENV
 
       - name: Set identifier
-        run: echo "DLS_OS_IDENTIFIER=${{ matrix.config.product }}-${{ matrix.config.arch }}-${{ matrix.config.edition }}-${{ matrix.config.variant }}-${{ matrix.config.apilevel }}" >> $GITHUB_ENV
+        run: echo "DROIDIAN_IDENTIFIER=${{ matrix.config.product }}-${{ matrix.config.arch }}-${{ matrix.config.edition }}-${{ matrix.config.variant }}-${{ matrix.config.apilevel }}" >> $GITHUB_ENV
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -65,9 +66,6 @@ jobs:
 
       - name: Create build dir
         run: mkdir -p /tmp/buildd-results
-
-      - name: Pull container
-        run: docker pull quay.io/droidian/rootfs-builder:next-amd64
 
       - name: Pull container
         run: docker pull quay.io/droidian/rootfs-builder:next-amd64
@@ -111,20 +109,21 @@ jobs:
       - name: Nightly tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: startsWith(github.ref, 'refs/tags/dls_os') != true
+        if: startsWith(github.ref, 'refs/tags/droidian') != true
         run: |
           gh release delete nightly --yes | true
           git push --delete origin refs/tags/nightly || true
           gh release create nightly
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          path: dls_os-out
+          path: droidian-out
 
       - name: Create SHA256SUMS
         run: |
-          cd dls_os-out
-          for x in dls_os-out-*; do
+          cd droidian-out
+          for x in droidian-out-*; do
             cd $x
             sha256sum * >> ../SHA256SUMS
             cd ..
@@ -132,20 +131,20 @@ jobs:
 
       - name: Create stable release (drafted)
         id: create_release
-        if: startsWith(github.ref, 'refs/tags/dls_os')
+        if: startsWith(github.ref, 'refs/tags/droidian')
         uses: softprops/action-gh-release@v2
         with:
-          files: dls_os-out/SHA256SUMS
+          files: droidian-out/SHA256SUMS
           tag_name: ${{ github.ref }}
           draft: true
           prerelease: false
 
       - name: Create nightly release
         id: create_nightly
-        if: startsWith(github.ref, 'refs/tags/dls_os') != true
+        if: startsWith(github.ref, 'refs/tags/droidian') != true
         uses: softprops/action-gh-release@v2
         with:
-          files: dls_os-out/SHA256SUMS
+          files: droidian-out/SHA256SUMS
           tag_name: nightly
           draft: false
           prerelease: true
@@ -167,25 +166,25 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: dls_os-out-${{ matrix.config.product }}-${{ matrix.config.arch }}-${{ matrix.config.edition }}-${{ matrix.config.variant }}-${{ matrix.config.apilevel }}
-          path: dls_os-out
+          name: droidian-out-${{ matrix.config.product }}-${{ matrix.config.arch }}-${{ matrix.config.edition }}-${{ matrix.config.variant }}-${{ matrix.config.apilevel }}
+          path: droidian-out
 
       - name: Create stable release (drafted)
         id: create_release
-        if: startsWith(github.ref, 'refs/tags/dls_os')
+        if: startsWith(github.ref, 'refs/tags/droidian')
         uses: softprops/action-gh-release@v2
         with:
-          files: dls_os-out/*
+          files: droidian-out/*
           tag_name: ${{ github.ref }}
           draft: true
           prerelease: false
 
       - name: Create nightly release
         id: create_nightly
-        if: startsWith(github.ref, 'refs/tags/dls_os') != true
+        if: startsWith(github.ref, 'refs/tags/droidian') != true
         uses: softprops/action-gh-release@v2
         with:
-          files: dls_os-out/*
+          files: droidian-out/*
           tag_name: nightly
           draft: false
           prerelease: true
