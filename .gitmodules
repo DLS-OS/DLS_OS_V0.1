@@ -1,0 +1,9 @@
+[submodule "rootfs-templates"]
+	path = rootfs-templates
+	url = https://github.com/cypherlobo/rootfs-templates
+[submodule "android-recovery-flashing-template"]
+	path = android-recovery-flashing-template
+	url = https://github.com/cypherlobo/android-recovery-flashing-template.git
+[submodule "android-image-flashing-template"]
+	path = android-image-flashing-template
+	url = https://github.com/cypherlobo/android-image-flashing-template.git
