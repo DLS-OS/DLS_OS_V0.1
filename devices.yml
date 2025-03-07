@@ -55,7 +55,7 @@ rootfs:
   arch: [armhf, arm64]
   edition: phosh
   variant: phone
-  apilevel: [28, 29, 30, 32, 33]
+  apilevel: [28]
 
   packages: *adaptation_generic_packages
 
