@@ -50,14 +50,14 @@
 # Recovery-flashable rootfses                                          #
 ########################################################################
 
-#rootfs:
-#  type: rootfs
-#  arch: [armhf, arm64]
-#  edition: phosh
-#  variant: phone
-#  apilevel: [28, 29, 30, 32, 33]
+rootfs:
+  type: rootfs
+  arch: [armhf, arm64]
+  edition: phosh
+  variant: phone
+  apilevel: [28, 29, 30, 32, 33]
 
-#  packages: *adaptation_generic_packages
+  packages: *adaptation_generic_packages
 
   bundles:
     # Developer tools bundle
