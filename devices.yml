@@ -4,7 +4,7 @@
 
 .devtools_packages:
   packages: &devtools_packages
-    - dls_os-devtools
+    - droidian-devtools
     - adaptation-hybris-devtools
 
 .adaptation_generic_packages:
