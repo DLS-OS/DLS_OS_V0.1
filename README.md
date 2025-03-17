@@ -3,7 +3,7 @@ DLS OS
 
 F is a GNU/Linux distribution based on top of Mobian, a Debian-based distribution for mobile devices. The goal of DLS OS is to be able to run Mobian on Android phones.
 
-This repository is the canonical place to get DLS OS images.
+This repository is th e canonical place to get DLS OS images.
 
 # Which image to get?
 
